@@ -1,3 +1,5 @@
+from TimeUtils.utils import str2stamp
+
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as mtick
@@ -12,15 +14,20 @@ plt.rcParams["figure.figsize"] = [w, w*ratio]
 plt.rcParams["figure.autolayout"] = True
 
 
+FROM = str2stamp('2021-08-01 00:00:00')
+TO = str2stamp('2021-09-01 00:00:00')
+
 out = {'usa':{},'india':{}}
 with open(TIMESERIES, 'r') as f:
 	for line in f:
 		start, end, loc = line.split('\t')
-		idx = int((int(start) + int(end)) / 2)
-		try:
-			out[loc.strip()][idx] += 1
-		except KeyError:
-			out[loc.strip()][idx] = 1
+		
+		if int(start) >= FROM and int(end) < TO:		
+			idx = int((int(start) + int(end)) / 2)
+			try:
+				out[loc.strip()][idx] += 1
+			except KeyError:
+				out[loc.strip()][idx] = 1
 
 X_usa = [k for k,v in out['usa'].items()]
 Y_usa = [v for k,v in out['usa'].items()]
@@ -30,9 +37,9 @@ Y_india = [v for k,v in out['india'].items()]
 		
 
 ax1 = plt.subplot()
-l1, = ax1.scatter(X_usa, np.log2(Y_usa), color=(0,0,0,.33), linewidth=1, linestyle='--')
-#ax2 = ax1.twinx()
-#l2, = ax2.plot(X_india, np.log2(Y_india), color='blue', linewidth=.75)
+l1, = ax1.plot(X_usa, np.log2(Y_usa), color=(0,0,0,.33), linewidth=1, linestyle='--')
+ax2 = ax1.twinx()
+l2, = ax2.plot(X_india, np.log2(Y_india), color='blue', linewidth=.75)
 
 plt.show()
 
