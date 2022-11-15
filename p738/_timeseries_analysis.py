@@ -6,40 +6,57 @@ import matplotlib.ticker as mtick
 import numpy as np
 
 
-TIMESERIES = 'out/_738_twitter/locations.txt'
-
+OUT = 'out/p738'
 
 w, ratio = 10, 0.4
 plt.rcParams["figure.figsize"] = [w, w*ratio]
 plt.rcParams["figure.autolayout"] = True
 
+FROM = str2stamp('2020-12-01 00:00:00')
+TO = str2stamp('2021-01-01 00:00:00')
 
-FROM = str2stamp('2021-08-01 00:00:00')
-TO = str2stamp('2021-09-01 00:00:00')
-
-out = {'usa':{},'india':{}}
-with open(TIMESERIES, 'r') as f:
+out = {}
+with open(f'{OUT}/bot_timeseries.txt', 'r') as f:
 	for line in f:
-		start, end, loc = line.split('\t')
+		start, end, hum, fak, tot = line.split('\t')
 		
-		if int(start) >= FROM and int(end) < TO:		
+		if int(start) >= FROM and int(end) < TO:
 			idx = int((int(start) + int(end)) / 2)
-			try:
-				out[loc.strip()][idx] += 1
-			except KeyError:
-				out[loc.strip()][idx] = 1
+			out[idx] = [int(hum) / int(tot), int(fak) / int(tot)]
+			
+X,Yh,Yf = [],[],[]
+for x,y in out.items():
+	X.append(x)
+	Yh.append(y[0])
+	Yf.append(y[1])
 
-X_usa = [k for k,v in out['usa'].items()]
-Y_usa = [v for k,v in out['usa'].items()]
 
-X_india = [k for k,v in out['india'].items()]
-Y_india = [v for k,v in out['india'].items()]
-		
+dates = [
+        '2020-02-29 05:00:00', '2020-11-03 05:00:00',
+        '2020-05-25 05:00:00', '2020-08-11 05:00:00'
+]
+dates = [str2stamp(x) for x in dates]
+    
+#plt.axvline(dates[0], color=(0,0,0,.2), linewidth=.8)
+#plt.text(dates[0], 6.25, "South Carolina\nDem. Primary", verticalalignment='top')
+#plt.axvline(dates[1], color=(0,0,0,.2), linewidth=.8)
+#plt.text(dates[1], 6.25, "Election day", verticalalignment='top')
+#plt.axvline(dates[2], color=(0,0,0,.2), linewidth=.8)
+#plt.text(dates[2], 6.25, "Memorial day", verticalalignment='top')
+
+#plt.axvline(dates[3], color=(0,0,0,.2), linewidth=.8)
+#plt.text(dates[3], 6.25, "Kamala Harris\nAnnouncement", verticalalignment='top')
+	
 
 ax1 = plt.subplot()
-l1, = ax1.plot(X_usa, np.log2(Y_usa), color=(0,0,0,.33), linewidth=1, linestyle='--')
-ax2 = ax1.twinx()
-l2, = ax2.plot(X_india, np.log2(Y_india), color='blue', linewidth=.75)
+l1, = ax1.plot(X, Yh, color=(0,0,0), linewidth=1)#, linestyle='--')
+l2, = ax1.plot(X, Yf, color=(0,0,1), linewidth=1)#, linestyle='--')
+#ax2 = ax1.twinx()
+#l2, = ax2.plot(X, Yf, color='blue', linewidth=.75)
+
+
+
+    
 
 plt.show()
 
